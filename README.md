@@ -1,6 +1,6 @@
 ---
 title: Inappbrowser
-description: Open an in-app browser window.
+description: Fork for showing a whole web page both in iOS and Android.
 ---
 <!--
 # license: Licensed to the Apache Software Foundation (ASF) under one
@@ -710,3 +710,27 @@ iab.open('http://url-that-fails-whitelist.com', 'random_string'); // loads in th
 iab.open('http://url-that-fails-whitelist.com', 'random_string', 'location=no'); // loads in the InAppBrowser, no location bar
 
 ```
+
+## Fork Patch: remove the iOS close button
+
+This is our case:
+
+```javascript
+cordova.InAppBrowser.open('https://www.augen-lasern-vergleich.de/', '_blank', 'location=no,zoom=no');
+```
+
+The plugin will create a view in a new tab with no location bar (so we will not be able to see the URL).
+By default we will get iOS toolbar, with supplies a close ("Done") button and two navigation arrows in order to go backwards and forwards when possible.
+For our cordova app we would like to keep the arrows but get rid of the close button but there is no possible option to be included in the open method for that.
+The only way we can get rid of that button is to make a little patch on the CDVInAppBrowser.m file.
+Take a look at this line of code:
+```objectivec
+[self.toolbar setItems:@[self.closeButton, flexibleSpaceButton, self.backButton, fixedSpaceButton, self.forwardButton]];
+```
+
+We just have to remove `self.closeButton` from it so it ends up like this:
+```objectivec
+[self.toolbar setItems:@[flexibleSpaceButton, self.backButton, fixedSpaceButton, self.forwardButton]];
+```
+
+This way the plugin will create a toolbar for iOS but without the close button.
